@@ -467,7 +467,7 @@ Generated on: ${new Date().toLocaleString()}
             elements.qrcode.innerHTML = '';
 
             // Format: WIFI:S:<SSID>;T:<WPA|WEP|nopass>;P:<password>;H:<true|false>;;
-            const wifiString = `WIFI:S:${wifiConfig.wifi.ssid};T:WPA;P:${wifiConfig.wifi.password};H:${wifiConfig.wifi.hidden};;`;
+            const wifiString = `WIFI:S:${wifiConfig.wifi.ssid};T:WPA/WPA2;P:${wifiConfig.wifi.password};H:${wifiConfig.wifi.hidden};;`;
 
             try {
                 const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(wifiString)}`;
