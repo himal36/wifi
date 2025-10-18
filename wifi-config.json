@@ -1,0 +1,18 @@
+{
+  "wifi": {
+    "ssid": "Your_WiFi_Name",
+    "password": "Your_WiFi_Password",
+    "encryption": "WPA",
+    "hidden": false
+  },
+  "portal": {
+    "name": "Home Network",
+    "welcomeMessage": "Welcome to our WiFi network!",
+    "contact": "admin@example.com"
+  },
+  "features": {
+    "autoConnect": true,
+    "showPassword": false,
+    "generateQR": true
+  }
+}
