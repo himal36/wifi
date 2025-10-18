@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WiFi Connect Portal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
+        /* Add all the CSS styles from the previous example here */
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
@@ -227,134 +230,130 @@
         .instructions li {
             margin-bottom: 8px;
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
-            <div class="logo">
-                <i class="fas fa-wifi"></i>
+            <div class="loading" id="loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading WiFi configuration...
             </div>
-            <h1>Home Network</h1>
-            <p class="subtitle">Secure WiFi Access Portal</p>
             
-            <div class="wifi-info">
-                <div class="info-row">
-                    <span class="info-label">Network Name:</span>
-                    <span class="info-value" id="ssid">HomeNetwork_5G</span>
+            <div id="content" style="display: none;">
+                <div class="logo">
+                    <i class="fas fa-wifi"></i>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Security:</span>
-                    <span class="info-value">WPA2/WPA3</span>
-                </div>
-                <div class="info-row password-container">
-                    <span class="info-label">Password:</span>
-                    <span class="info-value" id="password">MySecurePassword123!</span>
-                    <button class="toggle-password" id="togglePassword">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Frequency:</span>
-                    <span class="info-value">2.4GHz & 5GHz</span>
-                </div>
-            </div>
-
-            <div id="statusMessage" class="status-message"></div>
-
-            <button class="btn btn-primary" id="connectBtn">
-                <i class="fas fa-plug"></i> Connect to WiFi Automatically
-            </button>
-
-            <button class="btn btn-secondary" id="copyPasswordBtn">
-                <i class="fas fa-copy"></i> Copy Password to Clipboard
-            </button>
-
-            <div class="qr-section">
-                <h3>Scan QR Code to Connect</h3>
-                <div class="qr-code" id="qrCode">
-                    <!-- QR Code will be generated here -->
-                    <i class="fas fa-qrcode" style="font-size: 80px; color: #333;"></i>
-                </div>
-                <p>Use your phone's camera to scan and connect instantly</p>
-            </div>
-
-            <div class="feature-grid">
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
+                <h1 id="portalName">Home Network</h1>
+                <p class="subtitle" id="welcomeMessage">Secure WiFi Access Portal</p>
+                
+                <div class="wifi-info">
+                    <div class="info-row">
+                        <span class="info-label">Network Name:</span>
+                        <span class="info-value" id="ssid">Loading...</span>
                     </div>
-                    <div class="feature-text">Secure Connection</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
+                    <div class="info-row">
+                        <span class="info-label">Security:</span>
+                        <span class="info-value" id="encryption">WPA2</span>
                     </div>
-                    <div class="feature-text">High Speed</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-users"></i>
+                    <div class="info-row password-container">
+                        <span class="info-label">Password:</span>
+                        <span class="info-value" id="password">••••••••</span>
+                        <button class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
-                    <div class="feature-text">Multiple Devices</div>
                 </div>
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-infinity"></i>
-                    </div>
-                    <div class="feature-text">Unlimited Data</div>
-                </div>
-            </div>
 
-            <div class="instructions">
-                <strong>Connection Instructions:</strong>
-                <ol>
-                    <li>Click "Connect to WiFi Automatically" button</li>
-                    <li>Allow the connection request when prompted</li>
-                    <li>Your device will connect automatically</li>
-                    <li>Or scan the QR code with your phone's camera</li>
-                </ol>
+                <div id="statusMessage" class="status-message"></div>
+
+                <button class="btn btn-primary" id="connectBtn">
+                    <i class="fas fa-plug"></i> Connect to WiFi Automatically
+                </button>
+
+                <button class="btn btn-secondary" id="copyPasswordBtn">
+                    <i class="fas fa-copy"></i> Copy Password to Clipboard
+                </button>
+
+                <div class="qr-section" id="qrSection">
+                    <h3>Scan QR Code to Connect</h3>
+                    <div class="qr-code" id="qrCode">
+                        <!-- QR Code will be generated here -->
+                    </div>
+                    <p>Use your phone's camera to scan and connect instantly</p>
+                </div>
+
+                <div class="instructions">
+                    <strong>Connection Instructions:</strong>
+                    <ol>
+                        <li>Click "Connect to WiFi Automatically" button</li>
+                        <li>Allow the connection request when prompted</li>
+                        <li>Your device will connect automatically</li>
+                        <li>Or scan the QR code with your phone's camera</li>
+                    </ol>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Include QR Code Generator Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-
     <script>
-        // WiFi Configuration - UPDATE THESE VALUES FOR YOUR NETWORK
-        const wifiConfig = {
-            ssid: "HomeNetwork_5G",
-            password: "MySecurePassword123!",
-            encryption: "WPA"
-        };
+        // Load WiFi configuration from JSON file
+        async function loadWiFiConfig() {
+            try {
+                const response = await fetch('wifi-config.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load WiFi configuration');
+                }
+                const config = await response.json();
+                return config;
+            } catch (error) {
+                console.error('Error loading WiFi config:', error);
+                showStatus("Error loading WiFi configuration. Please check if wifi-config.json exists.", "error");
+                // Fallback to default config
+                return {
+                    wifi: {
+                        ssid: "HomeNetwork",
+                        password: "defaultpassword",
+                        encryption: "WPA"
+                    },
+                    portal: {
+                        name: "Home Network",
+                        welcomeMessage: "Secure WiFi Access Portal"
+                    }
+                };
+            }
+        }
 
-        // DOM Elements
-        const connectBtn = document.getElementById('connectBtn');
-        const copyPasswordBtn = document.getElementById('copyPasswordBtn');
-        const togglePasswordBtn = document.getElementById('togglePassword');
-        const passwordElement = document.getElementById('password');
-        const ssidElement = document.getElementById('ssid');
-        const statusMessage = document.getElementById('statusMessage');
-        const qrCodeElement = document.getElementById('qrCode');
-
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set WiFi details
-            ssidElement.textContent = wifiConfig.ssid;
-            passwordElement.textContent = wifiConfig.password;
+        // Initialize the portal
+        async function initializePortal() {
+            const config = await loadWiFiConfig();
+            
+            // Update UI with configuration
+            document.getElementById('portalName').textContent = config.portal.name;
+            document.getElementById('welcomeMessage').textContent = config.portal.welcomeMessage;
+            document.getElementById('ssid').textContent = config.wifi.ssid;
+            document.getElementById('encryption').textContent = config.wifi.encryption;
+            document.getElementById('password').textContent = config.wifi.password;
             
             // Generate QR Code
-            generateQRCode();
+            generateQRCode(config.wifi);
             
-            // Check if browser supports connection API
-            checkConnectionSupport();
-        });
+            // Set up event listeners
+            setupEventListeners(config.wifi);
+            
+            // Hide loading, show content
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
 
         // Generate QR Code for WiFi connection
-        function generateQRCode() {
-            // Clear previous QR code
+        function generateQRCode(wifiConfig) {
+            const qrCodeElement = document.getElementById('qrCode');
             qrCodeElement.innerHTML = '';
             
             // Create WiFi connection string in standard format
@@ -371,79 +370,62 @@
             });
         }
 
-        // Check if browser supports WiFi connection API
-        function checkConnectionSupport() {
-            if ('wifi' in navigator) {
-                connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect to WiFi Automatically';
-                connectBtn.disabled = false;
-            } else {
-                connectBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Open WiFi Settings';
-                showStatus("Your browser doesn't support automatic connection. Use the QR code or copy the password.", "error");
-            }
+        // Set up event listeners
+        function setupEventListeners(wifiConfig) {
+            const togglePasswordBtn = document.getElementById('togglePassword');
+            const passwordElement = document.getElementById('password');
+            const copyPasswordBtn = document.getElementById('copyPasswordBtn');
+            const connectBtn = document.getElementById('connectBtn');
+
+            // Toggle password visibility
+            togglePasswordBtn.addEventListener('click', function() {
+                if (passwordElement.textContent === wifiConfig.password) {
+                    passwordElement.textContent = '••••••••';
+                    togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                } else {
+                    passwordElement.textContent = wifiConfig.password;
+                    togglePasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                }
+            });
+
+            // Copy password to clipboard
+            copyPasswordBtn.addEventListener('click', function() {
+                navigator.clipboard.writeText(wifiConfig.password).then(function() {
+                    showStatus("Password copied to clipboard!", "success");
+                    copyPasswordBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    setTimeout(() => {
+                        copyPasswordBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Password to Clipboard';
+                    }, 2000);
+                }).catch(function(err) {
+                    showStatus("Failed to copy password: " + err, "error");
+                });
+            });
+
+            // Connect to WiFi
+            connectBtn.addEventListener('click', function() {
+                connectToWiFi(wifiConfig);
+            });
         }
 
-        // Toggle password visibility
-        togglePasswordBtn.addEventListener('click', function() {
-            if (passwordElement.textContent === wifiConfig.password) {
-                passwordElement.textContent = '••••••••••••••';
-                togglePasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
-            } else {
-                passwordElement.textContent = wifiConfig.password;
-                togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
-            }
-        });
-
-        // Copy password to clipboard
-        copyPasswordBtn.addEventListener('click', function() {
-            navigator.clipboard.writeText(wifiConfig.password).then(function() {
-                showStatus("Password copied to clipboard!", "success");
-                copyPasswordBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                setTimeout(() => {
-                    copyPasswordBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Password to Clipboard';
-                }, 2000);
-            }).catch(function(err) {
-                showStatus("Failed to copy password: " + err, "error");
-            });
-        });
-
         // Connect to WiFi
-        connectBtn.addEventListener('click', function() {
-            showStatus("Attempting to connect to WiFi...", "success");
+        function connectToWiFi(wifiConfig) {
+            showStatus("Attempting to connect to " + wifiConfig.ssid + "...", "success");
             
-            // Method 1: Using Web WiFi API (if available)
-            if ('wifi' in navigator) {
-                navigator.wifi.connect({
-                    ssid: wifiConfig.ssid,
-                    password: wifiConfig.password
-                }).then(function() {
-                    showStatus("Successfully connected to " + wifiConfig.ssid + "!", "success");
-                }).catch(function(error) {
-                    console.error("Connection failed:", error);
-                    showStatus("Automatic connection failed. Please use the QR code or manual connection.", "error");
-                    fallbackConnectionMethod();
-                });
-            } else {
-                // Method 2: Fallback for browsers without WiFi API
-                fallbackConnectionMethod();
-            }
-        });
-
-        // Fallback connection methods
-        function fallbackConnectionMethod() {
-            // Try to use the wifi:// URL scheme (works on some devices)
+            // Try to use the wifi:// URL scheme (works on many devices)
             const wifiUrl = `wifi://${wifiConfig.ssid}/${wifiConfig.password}`;
             
             // Attempt to redirect to WiFi settings or connection URL
             window.location.href = wifiUrl;
             
-            // If redirect fails, show manual instructions
+            // Fallback: Show manual instructions if redirect fails
             setTimeout(function() {
-                showStatus("Redirecting to WiFi settings... If nothing happens, please connect manually using the password above.", "success");
+                showStatus("Redirecting to WiFi settings... If nothing happens, please connect manually using the password.", "success");
             }, 1000);
         }
 
         // Show status message
         function showStatus(message, type) {
+            const statusMessage = document.getElementById('statusMessage');
             statusMessage.textContent = message;
             statusMessage.className = "status-message";
             
@@ -463,14 +445,8 @@
             }
         }
 
-        // Simulate connection process for dmonstration
-        function simulateConnection() {
-            showStatus("Connecting to " + wifiConfig.ssid + "...", "success");
-            
-            setTimeout(() => {
-                showStatus("Successfully connected to " + wifiConfig.ssid + "! You're now online.", "success");
-            }, 2000);
-        }
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializePortal);
     </script>
 </body>
-  </html>
+</html>
