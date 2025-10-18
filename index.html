@@ -149,6 +149,32 @@
 
         .pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
+        /* Auto-download notification */
+        .download-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .download-notification.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -158,12 +184,12 @@
                 <h3>📡 WiFi Configuration</h3>
                 <div class="info-row">
                     <div class="info-label">Network Name:</div>
-                    <div class="info-value" id="ssid">Your_WiFi_Name</div>
+                    <div class="info-value" id="ssid">MyWiFi</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Password:</div>
                     <div class="info-value">
-                        <span class="password-display" id="password">Your_WiFi_Password</span>
+                        <span class="password-display" id="password">N3v3r_Gu3ss_Th1s</span>
                         <button class="copy-btn" id="copy-password-btn" type="button">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                             Copy
@@ -197,6 +223,8 @@
             </button>
 
             <button class="btn btn-secondary" id="share-btn" type="button">📤 Share Network</button>
+            
+            <button class="btn" id="download-btn" type="button">💾 Download WiFi Details</button>
 
             <div class="hidden" id="offline-notice">
                 <p>You appear to be offline. This page is cached for offline use.</p>
@@ -205,8 +233,8 @@
             <div class="connection-details" id="connection-details">
                 <h3>📋 Connection Details</h3>
                 <p>Use these details to connect manually:</p>
-                <div class="ssid" id="large-ssid">Your_WiFi_Name</div>
-                <div class="password" id="large-password">Your_WiFi_Password</div>
+                <div class="ssid" id="large-ssid">MyWiFi</div>
+                <div class="password" id="large-password">N3v3r_Gu3ss_Th1s</div>
                 <div class="action-buttons">
                     <button class="btn btn-outline" id="copy-ssid-btn" type="button">Copy SSID</button>
                     <button class="btn btn-outline" id="copy-large-password-btn" type="button">Copy Password</button>
@@ -217,6 +245,11 @@
         <footer>
             <p>Need help? Contact: <span id="contact-info">admin@example.com</span></p>
         </footer>
+    </div>
+    
+    <!-- Auto-download notification -->
+    <div class="download-notification hidden" id="download-notification">
+        <span>✅ WiFi details downloaded!</span>
     </div>
 
     <script>
@@ -235,7 +268,8 @@
             },
             features: {
                 autoConnect: true,
-                generateQR: true
+                generateQR: true,
+                autoDownload: true // New feature for auto-download
             }
         };
 
@@ -254,13 +288,15 @@
             connectText: document.getElementById('connect-text'),
             connectLoading: document.getElementById('connect-loading'),
             shareBtn: document.getElementById('share-btn'),
+            downloadBtn: document.getElementById('download-btn'),
             statusMessage: document.getElementById('status-message'),
             offlineNotice: document.getElementById('offline-notice'),
             connectionDetails: document.getElementById('connection-details'),
             largeSsid: document.getElementById('large-ssid'),
             largePassword: document.getElementById('large-password'),
             copySsidBtn: document.getElementById('copy-ssid-btn'),
-            copyLargePasswordBtn: document.getElementById('copy-large-password-btn')
+            copyLargePasswordBtn: document.getElementById('copy-large-password-btn'),
+            downloadNotification: document.getElementById('download-notification')
         };
 
         // Safe helper to addEventListener only if element exists
@@ -304,9 +340,82 @@
 
             // Set up share button
             safeOn(elements.shareBtn, 'click', shareNetwork);
+            
+            // Set up download button
+            safeOn(elements.downloadBtn, 'click', downloadWiFiDetails);
 
             // Check online status
             checkOnlineStatus();
+            
+            // Auto-download on page load if enabled
+            if (wifiConfig.features.autoDownload) {
+                setTimeout(autoDownloadWiFiDetails, 1000); // Delay auto-download by 1 second
+            }
+        }
+
+        // Auto-download WiFi details on page load
+        function autoDownloadWiFiDetails() {
+            const content = generateWiFiFileContent();
+            const filename = `${wifiConfig.wifi.ssid}_WiFi_Details.txt`;
+            
+            downloadFile(content, filename);
+            
+            // Show notification
+            if (elements.downloadNotification) {
+                elements.downloadNotification.classList.remove('hidden');
+                setTimeout(() => {
+                    elements.downloadNotification.classList.add('hidden');
+                }, 3000);
+            }
+            
+            showStatus('WiFi details downloaded automatically', 'success');
+        }
+
+        // Generate content for the downloadable file
+        function generateWiFiFileContent() {
+            return `
+WiFi Network Details
+====================
+
+Network Name (SSID): ${wifiConfig.wifi.ssid}
+Password: ${wifiConfig.wifi.password}
+Security Type: ${wifiConfig.wifi.encryption}
+Hidden Network: ${wifiConfig.wifi.hidden ? 'Yes' : 'No'}
+
+Connection Instructions:
+1. Go to your device's WiFi settings
+2. Select the network "${wifiConfig.wifi.ssid}"
+3. Enter the password: "${wifiConfig.wifi.password}"
+4. Connect and enjoy!
+
+Additional Information:
+- Portal: ${wifiConfig.portal.name}
+- Contact: ${wifiConfig.portal.contact}
+
+Generated on: ${new Date().toLocaleString()}
+            `;
+        }
+
+        // Download WiFi details manually
+        function downloadWiFiDetails() {
+            const content = generateWiFiFileContent();
+            const filename = `${wifiConfig.wifi.ssid}_WiFi_Details.txt`;
+            
+            downloadFile(content, filename);
+            showStatus('WiFi details downloaded', 'success');
+        }
+
+        // Generic file download function
+        function downloadFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         // Load saved configuration from localStorage
