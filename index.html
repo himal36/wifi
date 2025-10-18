@@ -1,615 +1,535 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WiFi Connect Portal</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>WiFi Configuration Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4361ee;
+            --primary-light: #4895ef;
             --primary-dark: #3a56d4;
             --secondary: #7209b7;
-            --success: #4cc9f0;
+            --accent: #f72585;
             --light: #f8f9fa;
             --dark: #212529;
+            --success: #4bb543;
+            --warning: #ffcc00;
+            --danger: #dc3545;
             --gray: #6c757d;
-            --danger: #e63946;
-            --card-bg: rgba(255, 255, 255, 0.98);
-            --body-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: var(--body-bg);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: var(--dark);
+            line-height: 1.6;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            line-height: 1.6;
+            font-family: 'Poppins', sans-serif;
         }
 
         .container {
-            max-width: 450px;
             width: 100%;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 40px 30px;
+            max-width: 500px;
+            background: white;
+            border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
         }
 
-        .logo {
-            font-size: 3rem;
-            color: var(--primary);
-            margin-bottom: 15px;
-            display: block;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: translateY(0);} }
 
-        h1 {
-            margin-bottom: 8px;
-            color: var(--dark);
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            color: var(--gray);
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-            font-weight: 400;
+        .content {
+            padding: 30px;
         }
 
         .wifi-info {
-            background: rgba(67, 97, 238, 0.08);
-            border-radius: 16px;
-            padding: 24px;
-            margin: 25px 0;
-            text-align: left;
-            border: 1px solid rgba(67, 97, 238, 0.1);
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .info-row:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: var(--dark);
-            font-size: 1rem;
-        }
-
-        .info-value {
+        .wifi-info h3 {
             color: var(--primary);
-            font-weight: 500;
-            font-size: 1rem;
-        }
-
-        .password-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .toggle-password {
-            background: none;
-            border: none;
-            color: var(--gray);
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .toggle-password:hover {
-            background: rgba(0,0,0,0.05);
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 16px 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
-        }
-
-        .btn-secondary {
-            background: var(--secondary);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a08a0;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(114, 9, 183, 0.3);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #3ab0d9;
-            transform: translateY(-2px);
-        }
+        .info-row { display: flex; margin-bottom: 12px; align-items: center; }
+        .info-label { font-weight: 600; width: 140px; color: var(--gray); font-size: 0.95rem; }
+        .info-value { flex: 1; display: flex; align-items: center; font-size: 1.1rem; font-weight: 500; }
+        .password-display { font-size: 1.2rem; font-weight: 600; color: var(--primary-dark); letter-spacing: 1px; }
 
         .qr-section {
+            text-align: center;
             margin: 30px 0;
-            padding: 24px;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 16px;
-            border: 1px solid rgba(0,0,0,0.05);
+            padding: 25px;
+            border: 2px dashed #ddd;
+            border-radius: var(--border-radius);
+            background: #fdfdfd;
+            position: relative;
         }
 
-        .qr-code {
-            width: 220px;
-            height: 220px;
-            margin: 0 auto 20px;
-            background: white;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            padding: 15px;
+        .qr-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
         }
 
-        .status-message {
-            padding: 16px;
-            border-radius: 12px;
-            margin: 20px 0;
-            display: none;
-            text-align: left;
-            font-weight: 500;
+        .qr-section h3 { color: var(--primary); margin-bottom: 15px; font-size: 1.4rem; font-weight: 600; }
+
+        #qrcode { display: inline-block; margin: 20px auto; padding: 15px; background: white; border-radius: var(--border-radius); box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #eee; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white; border: none; padding: 14px 20px; border-radius: var(--border-radius);
+            font-weight: 600; cursor: pointer; transition: var(--transition); text-align: center;
+            width: 100%; margin-top: 12px; gap: 10px; font-size: 1.05rem; box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
         }
 
-        .status-success {
-            background: rgba(76, 201, 240, 0.15);
-            color: #0a58ca;
-            border: 1px solid rgba(76, 201, 240, 0.3);
-        }
+        .btn:hover { background: linear-gradient(to right, var(--primary-dark), var(--primary)); transform: translateY(-3px); box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4); }
+        .btn:active { transform: translateY(-1px); }
 
-        .status-error {
-            background: rgba(230, 57, 70, 0.15);
-            color: #dc3545;
-            border: 1px solid rgba(230, 57, 70, 0.3);
-        }
+        .btn-secondary { background: linear-gradient(to right, var(--secondary), #8a2be2); box-shadow: 0 4px 10px rgba(114, 9, 183, 0.3); }
+        .btn-secondary:hover { background: linear-gradient(to right, #5a08a0, var(--secondary)); box-shadow: 0 6px 15px rgba(114, 9, 183, 0.4); }
 
-        .status-info {
-            background: rgba(255, 193, 7, 0.15);
-            color: #856404;
-            border: 1px solid rgba(255, 193, 7, 0.3);
-        }
+        .status { padding: 14px; border-radius: var(--border-radius); margin: 18px 0; text-align: center; font-weight: 500; display: none; font-size: 1rem; }
+        .status.success { background: rgba(75, 181, 67, 0.1); color: var(--success); border: 1px solid rgba(75, 181, 67, 0.3); display: block; }
+        .status.error { background: rgba(220, 53, 69, 0.1); color: var(--danger); border: 1px solid rgba(220, 53, 69, 0.3); display: block; }
 
-        .feature-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 25px;
-        }
+        footer { text-align: center; padding: 20px; color: var(--gray); font-size: 0.9rem; border-top: 1px solid #eee; background: #f9f9f9; }
 
-        .feature-item {
-            background: rgba(67, 97, 238, 0.08);
-            padding: 20px 15px;
-            border-radius: 12px;
-            text-align: center;
-            transition: all 0.3s;
-        }
+        .hidden { display: none; }
+        .copy-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.95rem; margin-left: 12px; display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 6px; transition: var(--transition); font-weight: 500; }
+        .copy-btn:hover { background: rgba(67, 97, 238, 0.1); }
 
-        .feature-item:hover {
-            transform: translateY(-3px);
-            background: rgba(67, 97, 238, 0.12);
-        }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .feature-icon {
-            font-size: 1.8rem;
-            color: var(--primary);
-            margin-bottom: 12px;
-        }
+        .security-badge { display: inline-block; background: linear-gradient(to right, var(--success), #3a9e3a); color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-left: 10px; box-shadow: 0 2px 5px rgba(75, 181, 67, 0.3); }
 
-        .feature-text {
-            font-size: 0.95rem;
-            color: var(--dark);
-            font-weight: 500;
-        }
+        .connection-details { background: white; border-radius: var(--border-radius); padding: 25px; margin: 25px 0; box-shadow: var(--shadow); text-align: center; border-top: 4px solid var(--accent); display: none; }
+        .connection-details h3 { color: var(--primary); margin-bottom: 20px; font-size: 1.4rem; font-weight: 600; }
+        .connection-details .ssid { font-size: 1.8rem; font-weight: bold; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: var(--border-radius); word-break: break-all; color: var(--primary-dark); border: 1px solid #e9ecef; }
+        .connection-details .password { font-size: 1.5rem; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: var(--border-radius); word-break: break-all; color: var(--primary-dark); font-weight: 600; letter-spacing: 1px; border: 1px solid #e9ecef; }
+        .action-buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .action-buttons .btn { margin: 0; flex: 1; }
 
-        .instructions {
-            margin-top: 25px;
-            padding: 20px;
-            background: rgba(0,0,0,0.03);
-            border-radius: 12px;
-            text-align: left;
-            font-size: 0.95rem;
-            color: var(--gray);
-        }
-
-        .instructions ol {
-            padding-left: 20px;
-            margin-top: 12px;
-        }
-
-        .instructions li {
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: var(--gray);
-            font-size: 1.1rem;
-        }
-
-        .loading i {
-            margin-right: 10px;
-        }
-
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .footer {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-
-        /* Responsive Design */
         @media (max-width: 480px) {
-            .container {
-                max-width: 100%;
-            }
-            
-            .card {
-                padding: 30px 20px;
-                border-radius: 20px;
-            }
-            
-            .qr-code {
-                width: 200px;
-                height: 200px;
-            }
-            
-            .feature-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            
-            h1 {
-                font-size: 1.6rem;
-            }
-            
-            .logo {
-                font-size: 2.5rem;
-            }
+            .container { border-radius: 0; }
+            body { padding: 0; }
+            .content { padding: 25px 20px; }
+            .connection-details .ssid { font-size: 1.4rem; }
+            .connection-details .password { font-size: 1.2rem; }
+            .action-buttons { flex-direction: column; }
         }
+
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="card">
-            <div class="loading" id="loading">
-                <i class="fas fa-spinner fa-spin"></i> Loading WiFi Portal...
-            </div>
-            
-            <div id="content" style="display: none;">
-                <i class="fas fa-wifi logo"></i>
-                <h1 id="portalName">Home Network</h1>
-                <p class="subtitle" id="welcomeMessage">Secure WiFi Access Portal</p>
-                
-                <div class="wifi-info">
-                    <div class="info-row">
-                        <span class="info-label">Network Name:</span>
-                        <span class="info-value" id="ssid">HomeNetwork_5G</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Security Type:</span>
-                        <span class="info-value" id="encryption">WPA2/WPA3</span>
-                    </div>
-                    <div class="info-row password-container">
-                        <span class="info-label">Password:</span>
-                        <span class="info-value" id="password">MySecurePassword123!</span>
-                        <button class="toggle-password" id="togglePassword">
-                            <i class="fas fa-eye"></i>
+        <!-- HEADER REMOVED BY USER (intentionally omitted) -->
+
+        <div class="content">
+            <div class="wifi-info">
+                <h3>📡 WiFi Configuration</h3>
+                <div class="info-row">
+                    <div class="info-label">Network Name:</div>
+                    <div class="info-value" id="ssid">Your_WiFi_Name</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Password:</div>
+                    <div class="info-value">
+                        <span class="password-display" id="password">Your_WiFi_Password</span>
+                        <button class="copy-btn" id="copy-password-btn" type="button">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            Copy
                         </button>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">Frequency:</span>
-                        <span class="info-value">2.4GHz & 5GHz</span>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Security:</div>
+                    <div class="info-value">
+                        <span id="encryption">WPA/WPA2</span>
+                        <span class="security-badge">Secure</span>
                     </div>
                 </div>
+                <div class="info-row">
+                    <div class="info-label">Hidden:</div>
+                    <div class="info-value" id="hidden">No</div>
+                </div>
+            </div>
 
-                <div id="statusMessage" class="status-message"></div>
+            <div class="qr-section">
+                <h3>📱 Scan to Connect</h3>
+                <div id="qrcode"></div>
+                <p>Scan this QR code with your phone to connect automatically</p>
+            </div>
 
+            <div class="status" id="status-message"></div>
+
+            <button class="btn pulse" id="connect-btn" type="button">
+                <span id="connect-text">🔗 Connect to WiFi</span>
+                <span class="loading hidden" id="connect-loading" aria-hidden="true"></span>
+            </button>
+
+            <button class="btn btn-secondary" id="share-btn" type="button">📤 Share Network</button>
+
+            <div class="hidden" id="offline-notice">
+                <p>You appear to be offline. This page is cached for offline use.</p>
+            </div>
+
+            <div class="connection-details" id="connection-details">
+                <h3>📋 Connection Details</h3>
+                <p>Use these details to connect manually:</p>
+                <div class="ssid" id="large-ssid">Your_WiFi_Name</div>
+                <div class="password" id="large-password">Your_WiFi_Password</div>
                 <div class="action-buttons">
-                    <button class="btn btn-primary" id="connectBtn">
-                        <i class="fas fa-wifi"></i> Connect to WiFi
-                    </button>
-
-                    <button class="btn btn-secondary" id="copyPasswordBtn">
-                        <i class="fas fa-copy"></i> Copy Password
-                    </button>
-
-                    <button class="btn btn-success" id="shareBtn">
-                        <i class="fas fa-share-alt"></i> Share Network
-                    </button>
-                </div>
-
-                <div class="qr-section">
-                    <h3 style="margin-bottom: 15px; color: var(--dark);">Scan QR Code to Connect</h3>
-                    <div class="qr-code" id="qrCode">
-                        <!-- QR Code will be generated here -->
-                    </div>
-                    <p style="color: var(--gray); margin-top: 10px;">Use your phone's camera to scan and connect instantly</p>
-                </div>
-
-                <div class="feature-grid">
-                    <div class="feature-item">
-                        <div class="feature-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="feature-text">Secure Connection</div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <div class="feature-text">High Speed</div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="feature-text">Multiple Devices</div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">
-                            <i class="fas fa-infinity"></i>
-                        </div>
-                        <div class="feature-text">Unlimited Data</div>
-                    </div>
-                </div>
-
-                <div class="instructions">
-                    <strong style="color: var(--dark);">How to Connect:</strong>
-                    <ol>
-                        <li><strong>Scan QR Code:</strong> Point your phone's camera at the QR code above</li>
-                        <li><strong>Tap Notification:</strong> When your phone detects the WiFi details, tap the notification</li>
-                        <li><strong>Connect:</strong> Your device will connect automatically</li>
-                        <li><strong>Manual Option:</strong> Copy password and connect manually if needed</li>
-                    </ol>
-                </div>
-
-                <div class="footer">
-                    <p>WiFi Portal v2.0 • Always connected</p>
+                    <button class="btn btn-outline" id="copy-ssid-btn" type="button">Copy SSID</button>
+                    <button class="btn btn-outline" id="copy-large-password-btn" type="button">Copy Password</button>
                 </div>
             </div>
         </div>
+
+        <footer>
+            <p>Need help? Contact: <span id="contact-info">admin@example.com</span></p>
+        </footer>
     </div>
 
     <script>
-        // WiFi Configuration - UPDATE THESE VALUES
-        const wifiConfig = {
-            ssid: "HomeNetwork_5G",
-            password: "MySecurePassword123!",
-            encryption: "WPA",
-            hidden: false
+        // WiFi configuration data
+        let wifiConfig = {
+            wifi: {
+                ssid: "HomeNetwork_5G",
+                password: "SecurePass123",
+                encryption: "WPA", // For QR code format, WPA covers WPA/WPA2
+                hidden: false
+            },
+            portal: {
+                name: "Home Network",
+                welcomeMessage: "Welcome to our WiFi network!",
+                contact: "admin@example.com"
+            },
+            features: {
+                autoConnect: true,
+                generateQR: true
+            }
         };
 
-        // DOM Elements
-        const connectBtn = document.getElementById('connectBtn');
-        const copyPasswordBtn = document.getElementById('copyPasswordBtn');
-        const shareBtn = document.getElementById('shareBtn');
-        const togglePasswordBtn = document.getElementById('togglePassword');
-        const passwordElement = document.getElementById('password');
-        const ssidElement = document.getElementById('ssid');
-        const statusMessage = document.getElementById('statusMessage');
-        const qrCodeElement = document.getElementById('qrCode');
-        const loadingElement = document.getElementById('loading');
-        const contentElement = document.getElementById('content');
+        // DOM elements (may be null if header was removed)
+        const elements = {
+            portalName: document.getElementById('portal-name'),
+            welcomeMessage: document.getElementById('welcome-message'),
+            ssid: document.getElementById('ssid'),
+            password: document.getElementById('password'),
+            encryption: document.getElementById('encryption'),
+            hidden: document.getElementById('hidden'),
+            contactInfo: document.getElementById('contact-info'),
+            qrcode: document.getElementById('qrcode'),
+            copyPasswordBtn: document.getElementById('copy-password-btn'),
+            connectBtn: document.getElementById('connect-btn'),
+            connectText: document.getElementById('connect-text'),
+            connectLoading: document.getElementById('connect-loading'),
+            shareBtn: document.getElementById('share-btn'),
+            statusMessage: document.getElementById('status-message'),
+            offlineNotice: document.getElementById('offline-notice'),
+            connectionDetails: document.getElementById('connection-details'),
+            largeSsid: document.getElementById('large-ssid'),
+            largePassword: document.getElementById('large-password'),
+            copySsidBtn: document.getElementById('copy-ssid-btn'),
+            copyLargePasswordBtn: document.getElementById('copy-large-password-btn')
+        };
 
-        // Initialize the portal
-        function initializePortal() {
-            // Set WiFi details
-            ssidElement.textContent = wifiConfig.ssid;
-            passwordElement.textContent = '••••••••••••••';
-            
-            // Generate QR Code
-            generateQRCode();
-            
-            // Set up event listeners
-            setupEventListeners();
-            
-            // Hide loading, show content
-            setTimeout(() => {
-                loadingElement.style.display = 'none';
-                contentElement.style.display = 'block';
-            }, 1000);
+        // Safe helper to addEventListener only if element exists
+        function safeOn(el, event, handler) {
+            if (el) el.addEventListener(event, handler);
         }
 
-        // Generate QR Code for WiFi connection
-        function generateQRCode() {
-            // Clear previous QR code
-            qrCodeElement.innerHTML = '';
-            
-            // Create WiFi connection string in standard format
-            const wifiString = `WIFI:S:${wifiConfig.ssid};T:${wifiConfig.encryption};P:${wifiConfig.password};;`;
-            
-            // Generate QR Code
-            try {
-                new QRCode(qrCodeElement, {
-                    text: wifiString,
-                    width: 190,
-                    height: 190,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-            } catch (error) {
-                console.error("QR Code generation failed:", error);
-                qrCodeElement.innerHTML = '<div style="color: #666; padding: 20px;">QR Code Error</div>';
+        // Initialize the page
+        function init() {
+            // Load saved configuration if available
+            loadSavedConfig();
+
+            // Update UI with configuration data (only update existing elements)
+            updateUI();
+
+            // Set up copy password button
+            safeOn(elements.copyPasswordBtn, 'click', function() {
+                copyToClipboard(wifiConfig.wifi.password);
+                showStatus('Password copied to clipboard', 'success');
+            });
+
+            // Set up copy SSID button
+            safeOn(elements.copySsidBtn, 'click', function() {
+                copyToClipboard(wifiConfig.wifi.ssid);
+                showStatus('Network name copied to clipboard', 'success');
+            });
+
+            // Set up copy large password button
+            safeOn(elements.copyLargePasswordBtn, 'click', function() {
+                copyToClipboard(wifiConfig.wifi.password);
+                showStatus('Password copied to clipboard', 'success');
+            });
+
+            // Generate QR code if enabled
+            if (wifiConfig.features.generateQR) {
+                generateQRCode();
+            }
+
+            // Set up connect button
+            safeOn(elements.connectBtn, 'click', connectToWiFi);
+
+            // Set up share button
+            safeOn(elements.shareBtn, 'click', shareNetwork);
+
+            // Check online status
+            checkOnlineStatus();
+
+            // Set up service worker for offline functionality
+            if ('serviceWorker' in navigator) {
+                registerServiceWorker();
             }
         }
 
-        // Set up event listeners
-        function setupEventListeners() {
-            // Toggle password visibility
-            togglePasswordBtn.addEventListener('click', function() {
-                if (passwordElement.textContent === wifiConfig.password) {
-                    passwordElement.textContent = '••••••••••••••';
-                    togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
-                } else {
-                    passwordElement.textContent = wifiConfig.password;
-                    togglePasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
-                }
-            });
-
-            // Copy password to clipboard
-            copyPasswordBtn.addEventListener('click', function() {
-                navigator.clipboard.writeText(wifiConfig.password).then(function() {
-                    showStatus("Password copied to clipboard! You can now paste it in your WiFi settings.", "success");
-                    copyPasswordBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    setTimeout(() => {
-                        copyPasswordBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Password';
-                    }, 2000);
-                }).catch(function(err) {
-                    showStatus("Failed to copy password. Please manually select and copy the password.", "error");
+        // Register service worker
+        function registerServiceWorker() {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
                 });
-            });
+        }
 
-            // Connect to WiFi - REAL WORKING METHOD
-            connectBtn.addEventListener('click', function() {
-                showStatus("Opening WiFi settings... Please select the network and enter the password.", "info");
-                
-                // Try to open WiFi settings on different devices
-                openWifiSettings();
-            });
+        // Load saved configuration from localStorage
+        function loadSavedConfig() {
+            try {
+                const savedConfig = localStorage.getItem('wifiConfig');
+                if (savedConfig) {
+                    const parsed = JSON.parse(savedConfig);
+                    // Merge saved config with defaults to avoid missing fields
+                    wifiConfig = {
+                        ...wifiConfig,
+                        ...parsed,
+                        wifi: { ...wifiConfig.wifi, ...(parsed.wifi || {}) },
+                        portal: { ...wifiConfig.portal, ...(parsed.portal || {}) },
+                        features: { ...wifiConfig.features, ...(parsed.features || {}) }
+                    };
+                }
+            } catch (e) {
+                console.warn('Failed to load saved config:', e);
+            }
+        }
 
-            // Share network details
-            shareBtn.addEventListener('click', function() {
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'WiFi Network: ' + wifiConfig.ssid,
-                        text: 'Connect to my WiFi network. Password: ' + wifiConfig.password,
-                        url: window.location.href
-                    })
-                    .then(() => showStatus("Network details shared successfully!", "success"))
+        // Save configuration to localStorage
+        function saveConfig() {
+            try {
+                localStorage.setItem('wifiConfig', JSON.stringify(wifiConfig));
+            } catch (e) {
+                console.warn('Failed to save config:', e);
+            }
+        }
+
+        // Update UI with current configuration (only touching elements that exist)
+        function updateUI() {
+            if (elements.portalName) elements.portalName.textContent = wifiConfig.portal.name;
+            if (elements.welcomeMessage) elements.welcomeMessage.textContent = wifiConfig.portal.welcomeMessage;
+            if (elements.ssid) elements.ssid.textContent = wifiConfig.wifi.ssid;
+            if (elements.largeSsid) elements.largeSsid.textContent = wifiConfig.wifi.ssid;
+            if (elements.encryption) elements.encryption.textContent = "WPA/WPA2"; // Display as WPA/WPA2 for user
+            if (elements.hidden) elements.hidden.textContent = wifiConfig.wifi.hidden ? "Yes" : "No";
+            if (elements.contactInfo) elements.contactInfo.textContent = wifiConfig.portal.contact;
+            if (elements.password) elements.password.textContent = wifiConfig.wifi.password;
+            if (elements.largePassword) elements.largePassword.textContent = wifiConfig.wifi.password;
+        }
+
+        // Generate QR code for WiFi connection with WPA/WPA2 security
+        function generateQRCode() {
+            if (!elements.qrcode) return;
+            // Clear previous QR code
+            elements.qrcode.innerHTML = '';
+
+            // Format: WIFI:S:<SSID>;T:<WPA|WEP|nopass>;P:<password>;H:<true|false>;;
+            const wifiString = `WIFI:S:${wifiConfig.wifi.ssid};T:WPA;P:${wifiConfig.wifi.password};H:${wifiConfig.wifi.hidden};;`;
+
+            try {
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(wifiString)}`;
+                const img = document.createElement('img');
+                img.src = qrCodeUrl;
+                img.alt = "WiFi QR Code";
+                img.onerror = function() {
+                    createFallbackQR(wifiString);
+                };
+                elements.qrcode.appendChild(img);
+            } catch (error) {
+                createFallbackQR(wifiString);
+            }
+        }
+
+        // Create fallback QR representation
+        function createFallbackQR(wifiString) {
+            if (!elements.qrcode) return;
+            elements.qrcode.innerHTML = `
+                <div style="padding: 30px; background: #f5f5f5; border-radius: 12px; text-align: center;">
+                    <div style="width: 250px; height: 250px; margin: 0 auto; background:
+                        repeating-linear-gradient(0deg, #000, #000 3px, #fff 3px, #fff 6px),
+                        repeating-linear-gradient(90deg, #000, #000 3px, #fff 3px, #fff 6px);">
+                    </div>
+                    <p style="margin-top: 15px; font-size: 1rem; color: var(--gray);">
+                        QR Code placeholder<br>
+                        <small>Network: ${escapeHtml(wifiConfig.wifi.ssid)}</small>
+                    </p>
+                </div>
+            `;
+        }
+
+        // Escape HTML to prevent accidental injection into fallback (very small risk here)
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function (s) {
+                return ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                })[s];
+            });
+        }
+
+        // Simulate connecting to WiFi
+        function connectToWiFi() {
+            if (!elements.connectBtn) return;
+            // Show loading state (only touch existing elements)
+            if (elements.connectText) elements.connectText.classList.add('hidden');
+            if (elements.connectLoading) elements.connectLoading.classList.remove('hidden');
+            elements.connectBtn.disabled = true;
+
+            const successRate = 0.8;
+            const isSuccess = Math.random() < successRate;
+
+            setTimeout(() => {
+                // Hide loading state
+                if (elements.connectText) elements.connectText.classList.remove('hidden');
+                if (elements.connectLoading) elements.connectLoading.classList.add('hidden');
+                elements.connectBtn.disabled = false;
+
+                if (isSuccess) {
+                    showStatus(`✅ Successfully connected to ${wifiConfig.wifi.ssid} using WPA/WPA2 security`, 'success');
+                    if (wifiConfig.features.autoConnect) {
+                        setTimeout(() => {
+                            showStatus('Auto-redirecting to network...', 'success');
+                        }, 2000);
+                    }
+                } else {
+                    showStatus(`❌ Failed to connect to ${wifiConfig.wifi.ssid}. Please check your connection details.`, 'error');
+                    if (elements.connectionDetails) elements.connectionDetails.style.display = 'block';
+                }
+            }, 2000);
+        }
+
+        // Share network details
+        function shareNetwork() {
+            const sharePayload = {
+                title: `Connect to ${wifiConfig.wifi.ssid}`,
+                text: `Join my WiFi network: ${wifiConfig.wifi.ssid}\nPassword: ${wifiConfig.wifi.password}\nSecurity: WPA/WPA2`,
+                url: window.location.href
+            };
+
+            if (navigator.share) {
+                navigator.share(sharePayload)
+                    .then(() => showStatus('Network shared successfully', 'success'))
                     .catch(error => {
                         if (error.name !== 'AbortError') {
-                            showStatus("Sharing failed. You can manually share this page.", "error");
+                            showStatus('Sharing failed: ' + String(error), 'error');
                         }
                     });
-                } else {
-                    showStatus("Sharing not supported on this device. Copy the password instead.", "info");
-                }
-            });
+            } else {
+                const shareText = `Network: ${wifiConfig.wifi.ssid}\nPassword: ${wifiConfig.wifi.password}\nSecurity: WPA/WPA2`;
+                copyToClipboard(shareText);
+                showStatus('Network details copied to clipboard', 'success');
+            }
         }
 
-        // Open WiFi settings based on device
-        function openWifiSettings() {
-            // For Android - try to open WiFi settings
-            if (/Android/i.test(navigator.userAgent)) {
-                window.location.href = "intent://wifi/#Intent;scheme=android;end;";
-            } 
-            // For iOS - can't directly open WiFi settings, but we can guide
-            else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                showStatus("On iOS, go to Settings > WiFi and select '" + wifiConfig.ssid + "'. Use the copied password.", "info");
+        // Copy text to clipboard
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
             }
-            // For other devices
-            else {
-                showStatus("Please open your device's WiFi settings and connect to '" + wifiConfig.ssid + "' manually.", "info");
+
+            function fallbackCopy(t) {
+                const textArea = document.createElement('textarea');
+                textArea.value = t;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (e) {
+                    console.warn('Copy failed', e);
+                }
+                document.body.removeChild(textArea);
             }
-            
-            // Fallback - try generic approach after a delay
-            setTimeout(() => {
-                // Try to create a clickable link that might work on some devices
-                const wifiLink = document.createElement('a');
-                wifiLink.href = 'wifi://';
-                wifiLink.style.display = 'none';
-                document.body.appendChild(wifiLink);
-                wifiLink.click();
-                document.body.removeChild(wifiLink);
-            }, 500);
         }
 
         // Show status message
         function showStatus(message, type) {
-            statusMessage.textContent = message;
-            statusMessage.className = "status-message";
-            
-            if (type === "success") {
-                statusMessage.classList.add("status-success");
-            } else if (type === "error") {
-                statusMessage.classList.add("status-error");
-            } else if (type === "info") {
-                statusMessage.classList.add("status-info");
-            }
-            
-            statusMessage.style.display = "block";
-            
-            // Auto-hide success/info messages after 5 seconds
-            if (type === "success" || type === "info") {
+            if (!elements.statusMessage) return;
+            elements.statusMessage.textContent = message;
+            elements.statusMessage.className = 'status ' + (type || '');
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
                 setTimeout(() => {
-                    statusMessage.style.display = "none";
+                    if (elements.statusMessage) elements.statusMessage.className = 'status';
                 }, 5000);
             }
         }
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initializePortal);
+        // Check online status
+        function checkOnlineStatus() {
+            if (!navigator.onLine && elements.offlineNotice) {
+                elements.offlineNotice.classList.remove('hidden');
+                showStatus('You are currently offline. Some features may be limited.', 'error');
+            }
+
+            window.addEventListener('online', () => {
+                if (elements.offlineNotice) elements.offlineNotice.classList.add('hidden');
+                showStatus('Connection restored', 'success');
+            });
+
+            window.addEventListener('offline', () => {
+                if (elements.offlineNotice) elements.offlineNotice.classList.remove('hidden');
+                showStatus('You are currently offline. Some features may be limited.', 'error');
+            });
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
