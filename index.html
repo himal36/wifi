@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>WiFi Configuration Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4361ee;
@@ -35,7 +34,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            font-family: 'Poppins', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
 
         .container {
@@ -154,8 +153,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- HEADER REMOVED BY USER (intentionally omitted) -->
-
         <div class="content">
             <div class="wifi-info">
                 <h3>📡 WiFi Configuration</h3>
@@ -228,7 +225,7 @@
             wifi: {
                 ssid: "HomeNetwork_5G",
                 password: "SecurePass123",
-                encryption: "WPA", // For QR code format, WPA covers WPA/WPA2
+                encryption: "WPA",
                 hidden: false
             },
             portal: {
@@ -242,7 +239,7 @@
             }
         };
 
-        // DOM elements (may be null if header was removed)
+        // DOM elements
         const elements = {
             portalName: document.getElementById('portal-name'),
             welcomeMessage: document.getElementById('welcome-message'),
@@ -276,7 +273,7 @@
             // Load saved configuration if available
             loadSavedConfig();
 
-            // Update UI with configuration data (only update existing elements)
+            // Update UI with configuration data
             updateUI();
 
             // Set up copy password button
@@ -297,9 +294,9 @@
                 showStatus('Password copied to clipboard', 'success');
             });
 
-            // Generate QR code if enabled
+            // Generate QR code if enabled (lazy load)
             if (wifiConfig.features.generateQR) {
-                generateQRCode();
+                setTimeout(generateQRCode, 500); // Delay QR generation
             }
 
             // Set up connect button
@@ -310,22 +307,6 @@
 
             // Check online status
             checkOnlineStatus();
-
-            // Set up service worker for offline functionality
-            if ('serviceWorker' in navigator) {
-                registerServiceWorker();
-            }
-        }
-
-        // Register service worker
-        function registerServiceWorker() {
-            navigator.serviceWorker.register('./sw.js')
-                .then(registration => {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                })
-                .catch(error => {
-                    console.log('Service Worker registration failed:', error);
-                });
         }
 
         // Load saved configuration from localStorage
@@ -334,7 +315,7 @@
                 const savedConfig = localStorage.getItem('wifiConfig');
                 if (savedConfig) {
                     const parsed = JSON.parse(savedConfig);
-                    // Merge saved config with defaults to avoid missing fields
+                    // Merge saved config with defaults
                     wifiConfig = {
                         ...wifiConfig,
                         ...parsed,
@@ -357,20 +338,20 @@
             }
         }
 
-        // Update UI with current configuration (only touching elements that exist)
+        // Update UI with current configuration
         function updateUI() {
             if (elements.portalName) elements.portalName.textContent = wifiConfig.portal.name;
             if (elements.welcomeMessage) elements.welcomeMessage.textContent = wifiConfig.portal.welcomeMessage;
             if (elements.ssid) elements.ssid.textContent = wifiConfig.wifi.ssid;
             if (elements.largeSsid) elements.largeSsid.textContent = wifiConfig.wifi.ssid;
-            if (elements.encryption) elements.encryption.textContent = "WPA/WPA2"; // Display as WPA/WPA2 for user
+            if (elements.encryption) elements.encryption.textContent = "WPA/WPA2";
             if (elements.hidden) elements.hidden.textContent = wifiConfig.wifi.hidden ? "Yes" : "No";
             if (elements.contactInfo) elements.contactInfo.textContent = wifiConfig.portal.contact;
             if (elements.password) elements.password.textContent = wifiConfig.wifi.password;
             if (elements.largePassword) elements.largePassword.textContent = wifiConfig.wifi.password;
         }
 
-        // Generate QR code for WiFi connection with WPA/WPA2 security
+        // Generate QR code for WiFi connection
         function generateQRCode() {
             if (!elements.qrcode) return;
             // Clear previous QR code
@@ -384,6 +365,7 @@
                 const img = document.createElement('img');
                 img.src = qrCodeUrl;
                 img.alt = "WiFi QR Code";
+                img.loading = "lazy"; // Lazy load the QR code
                 img.onerror = function() {
                     createFallbackQR(wifiString);
                 };
@@ -410,7 +392,7 @@
             `;
         }
 
-        // Escape HTML to prevent accidental injection into fallback (very small risk here)
+        // Escape HTML to prevent injection
         function escapeHtml(str) {
             return String(str).replace(/[&<>"']/g, function (s) {
                 return ({
@@ -422,7 +404,7 @@
         // Simulate connecting to WiFi
         function connectToWiFi() {
             if (!elements.connectBtn) return;
-            // Show loading state (only touch existing elements)
+            // Show loading state
             if (elements.connectText) elements.connectText.classList.add('hidden');
             if (elements.connectLoading) elements.connectLoading.classList.remove('hidden');
             elements.connectBtn.disabled = true;
