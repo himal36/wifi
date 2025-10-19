@@ -1,15 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content="WiFi Configuration Portal - Connect to your network easily">
-    <meta http-equiv="Cache-Control" content="public, max-age=3600">
     <title>WiFi Configuration Portal</title>
     
     <!-- Preload critical resources -->
     <link rel="preload" as="style" href="#">
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://api.qrserver.com">
     
     <style>
         :root {
@@ -178,9 +179,6 @@
             gap: 10px; 
             font-size: 1.05rem; 
             box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
-            /* Prevent layout shift by ensuring consistent height */
-            min-height: 54px;
-            position: relative;
         }
 
         .btn:hover { 
@@ -262,14 +260,10 @@
             border-radius: 50%; 
             border-top-color: #fff; 
             animation: spin 1s ease-in-out infinite; 
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
         }
         @keyframes spin { 
             to { 
-                transform: translate(-50%, -50%) rotate(360deg); 
+                transform: rotate(360deg); 
             } 
         }
 
@@ -432,15 +426,6 @@
             background: var(--primary);
             color: white;
         }
-
-        /* Prevent layout shifts for connect button */
-        .connect-btn-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-        }
     </style>
 </head>
 <body>
@@ -488,7 +473,7 @@
             <div class="status" id="status-message"></div>
 
             <button class="btn pulse" id="connect-btn" type="button">
-                <span class="connect-btn-content" id="connect-text">🔗 Connect to WiFi</span>
+                <span id="connect-text">🔗 Connect to WiFi</span>
                 <span class="loading hidden" id="connect-loading" aria-hidden="true"></span>
             </button>
 
@@ -604,9 +589,14 @@
                 showStatus('Password copied to clipboard', 'success');
             });
 
-            // Generate QR code immediately without external API
+            // Generate QR code if enabled (with priority)
             if (wifiConfig.features.generateQR) {
-                generateQRCode();
+                // Use requestIdleCallback for non-critical task
+                if ('requestIdleCallback' in window) {
+                    requestIdleCallback(() => generateQRCode());
+                } else {
+                    setTimeout(generateQRCode, 100);
+                }
             }
 
             // Set up button events
@@ -616,6 +606,29 @@
 
             // Check online status
             checkOnlineStatus();
+            
+            // Disabled auto-download to prevent unexpected behavior
+            // if (wifiConfig.features.autoDownload) {
+            //     setTimeout(autoDownloadWiFiDetails, 3000);
+            // }
+        }
+
+        // Auto-download WiFi details on page load
+        function autoDownloadWiFiDetails() {
+            const content = generateWiFiFileContent();
+            const filename = `${wifiConfig.wifi.ssid}_WiFi_Details.txt`;
+            
+            downloadFile(content, filename);
+            
+            // Show notification
+            if (elements.downloadNotification) {
+                elements.downloadNotification.classList.remove('hidden');
+                setTimeout(() => {
+                    elements.downloadNotification.classList.add('hidden');
+                }, 3000);
+            }
+            
+            showStatus('WiFi details downloaded automatically', 'success');
         }
 
         // Generate content for the downloadable file
@@ -711,19 +724,51 @@ Generated on: ${new Date().toLocaleString()}`;
             if (elements.largePassword) elements.largePassword.textContent = wifiConfig.wifi.password;
         }
 
-        // Generate QR code for WiFi connection - NO EXTERNAL API
+        // Generate QR code for WiFi connection
         function generateQRCode() {
             if (!elements.qrcode || !elements.qrPlaceholder) return;
             
-            // Simple visual QR representation without external API calls
+            // Format: WIFI:S:<SSID>;T:<WPA|WEP|nopass>;P:<password>;H:<true|false>;;
+            const wifiString = `WIFI:S:${wifiConfig.wifi.ssid};T:WPA;P:${wifiConfig.wifi.password};H:${wifiConfig.wifi.hidden};;`;
+
+            try {
+                // Use web workers or service workers for better performance in real apps
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(wifiString)}`;
+                const img = new Image();
+                img.width = 250;
+                img.height = 250;
+                img.src = qrCodeUrl;
+                img.alt = `QR Code for WiFi: ${wifiConfig.wifi.ssid}`;
+                img.loading = "eager"; // Change from lazy to eager for LCP improvement
+                
+                img.onload = function() {
+                    // Hide placeholder and show QR code
+                    elements.qrPlaceholder.style.display = 'none';
+                    elements.qrcode.innerHTML = '';
+                    elements.qrcode.appendChild(img);
+                    elements.qrcode.style.display = 'inline-block';
+                };
+                
+                img.onerror = function() {
+                    createFallbackQR(wifiString);
+                };
+                
+            } catch (error) {
+                createFallbackQR(wifiString);
+            }
+        }
+
+        // Create fallback QR representation
+        function createFallbackQR(wifiString) {
+            if (!elements.qrcode || !elements.qrPlaceholder) return;
+            
             elements.qrPlaceholder.style.display = 'none';
             elements.qrcode.innerHTML = `
-                <div style="width: 250px; height: 250px; margin: 0 auto; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; text-align: center; border: 1px solid #eee;">
+                <div style="width: 250px; height: 250px; margin: 0 auto; background: #f5f5f5; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; text-align: center;">
                     <div style="font-size: 3rem; margin-bottom: 15px;">📶</div>
-                    <strong style="font-size: 1.1rem; margin-bottom: 10px;">${escapeHtml(wifiConfig.wifi.ssid)}</strong>
                     <p style="font-size: 0.9rem; color: var(--gray);">
-                        Point your phone camera<br>
-                        <small>at this WiFi information</small>
+                        QR Code unavailable<br>
+                        <small>Network: ${escapeHtml(wifiConfig.wifi.ssid)}</small>
                     </p>
                 </div>
             `;
@@ -740,30 +785,23 @@ Generated on: ${new Date().toLocaleString()}`;
             });
         }
 
-        // Simulate connecting to WiFi - FIXED LAYOUT SHIFT
+        // Simulate connecting to WiFi
         function connectToWiFi() {
             if (!elements.connectBtn) return;
             
-            // Show loading state WITHOUT layout shift
+            // Show loading state
+            if (elements.connectText) elements.connectText.classList.add('hidden');
+            if (elements.connectLoading) elements.connectLoading.classList.remove('hidden');
             elements.connectBtn.disabled = true;
-            // Use opacity instead of display none to prevent layout shift
-            if (elements.connectText) elements.connectText.style.opacity = '0';
-            if (elements.connectLoading) {
-                elements.connectLoading.classList.remove('hidden');
-                elements.connectLoading.style.opacity = '1';
-            }
 
             const successRate = 0.8;
             const isSuccess = Math.random() < successRate;
 
             setTimeout(() => {
-                // Hide loading state WITHOUT layout shift
+                // Hide loading state
+                if (elements.connectText) elements.connectText.classList.remove('hidden');
+                if (elements.connectLoading) elements.connectLoading.classList.add('hidden');
                 elements.connectBtn.disabled = false;
-                if (elements.connectText) elements.connectText.style.opacity = '1';
-                if (elements.connectLoading) {
-                    elements.connectLoading.classList.add('hidden');
-                    elements.connectLoading.style.opacity = '0';
-                }
 
                 if (isSuccess) {
                     showStatus(`✅ Successfully connected to ${wifiConfig.wifi.ssid} using WPA/WPA2 security`, 'success');
